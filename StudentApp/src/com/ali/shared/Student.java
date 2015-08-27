@@ -27,11 +27,19 @@ public class Student implements Serializable {
 	private Date dob;
 	private String class_;
 	private String name;
+	private int rollNo;
+	public int getRollNo() {
+		return rollNo;
+	}
+	public void setRollNo(int rollNo) {
+		this.rollNo = rollNo;
+	}
 	public Student(){
 		
 	}
-	public Student(String name,Date dob,String class_){
+	public Student(String name,int rollNo,Date dob,String class_){
 		this.name=name;
+		this.rollNo=rollNo;
 		this.dob=dob;
 		this.class_=class_;
 		

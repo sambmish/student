@@ -8,6 +8,9 @@
             <column name="NAME" />
             <generator class="assigned" />
         </id>
+        <property name="rollNo" type="java.lang.Integer">
+            <column name="ROLLNO" />
+        </property>
         <property name="class_" type="java.lang.String">
             <column name="CLASS" />
         </property>

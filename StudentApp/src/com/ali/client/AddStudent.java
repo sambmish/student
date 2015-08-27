@@ -1,27 +1,32 @@
 package com.ali.client;
 
 import java.util.Date;
+import java.util.List;
 
 import com.ali.shared.Student;
+import com.ali.shared.StudentValidator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
-import com.google.gwt.user.datepicker.client.DatePicker;
 
 public class AddStudent extends Composite {
 	TextBox tb1;
-	DateBox tb2;
-	TextBox tb3;
+	TextBox tb2;
+	
+	DateBox tb3;
+	ListBox tb4;
 	
 	private final StudentServiceAsync studentService = GWT
 			.create(StudentService.class);
@@ -37,18 +42,34 @@ public class AddStudent extends Composite {
 		tb1 = new TextBox();
 		hp1.add(name);
 		hp1.add(tb1);
-
+		
 		HorizontalPanel hp2 = new HorizontalPanel();
-		Label dob = new Label("Date Of Birth:");
-		tb2 = new DateBox();
-		hp2.add(dob);
+		Label rollNo = new Label("RollNo:");
+		tb2 = new TextBox();
+		hp2.add(rollNo);
 		hp2.add(tb2);
-
+		
 		HorizontalPanel hp3 = new HorizontalPanel();
-		Label class_ = new Label("Class:");
-		tb3 = new TextBox();
-		hp3.add(class_);
+		Label dob = new Label("Date Of Birth:");
+		tb3 = new DateBox();
+		hp3.add(dob);
 		hp3.add(tb3);
+
+		HorizontalPanel hp4 = new HorizontalPanel();
+		Label class_ = new Label("Class:");
+		tb4 = new ListBox();
+		hp4.add(class_);
+		hp4.add(tb4);
+		tb4.addItem("I", "I");
+		tb4.addItem("II", "II");
+		tb4.addItem("III", "III");
+		tb4.addItem("IV", "IV");
+		tb4.addItem("V", "V");
+		tb4.addItem("VI", "VI");
+		tb4.addItem("VII", "VII");
+		tb4.addItem("VIII", "VIII");
+		tb4.addItem("IX", "IX");
+		tb4.addItem("X", "X");
 		
 		HorizontalPanel hpanel=new HorizontalPanel();
 		SubmitButton backbutton=new SubmitButton("Back");
@@ -60,6 +81,7 @@ public class AddStudent extends Composite {
 		vpanel.add(hp1);
 		vpanel.add(hp2);
 		vpanel.add(hp3);
+		vpanel.add(hp4);
 		SubmitButton save = new SubmitButton("Save", new ButtonClickHandler());
 		vpanel.add(save);
 		vpanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -73,14 +95,21 @@ public class AddStudent extends Composite {
 		public void onClick(ClickEvent event) {
 			// TODO Auto-generated method stub
 			String name = tb1.getText();
-			Date dob = tb2.getValue();
-			/*
-			 * try { dob = new SimpleDateFormat().parse(tb2.getText()); }
-			 * catch (ParseException e) { // TODO Auto-generated catch block
-			 * e.printStackTrace(); }
-			 */
-			String _class = tb3.getText();
-			Student s = new Student(name, dob, _class);
+			String rollNo=tb2.getText();
+			//System.out.println(rollNo+"Ali");
+			int rollNumber=rollNo.equals("")?0:Integer.parseInt(rollNo);
+			Date dob = tb3.getValue();
+			String _class = tb4.getItemText(tb4.getSelectedIndex());
+			try {
+				this.validateStudent(name,rollNo,dob);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			Student s = new Student(name,rollNumber, dob, _class);
+			
+			
+			
 			studentService.saveStudent(s, new AsyncCallback<Void>() {
 
 				@Override
@@ -97,9 +126,23 @@ public class AddStudent extends Composite {
 					System.out.println("Failure");
 
 				}
-			});
+			}
+			);
 
 		}
+		public void validateStudent(String name,String rollNo,Date dob) throws Exception{
+			StudentValidator sv=new StudentValidator();
+			List<String> errormsgs=sv.validateStudent(name, rollNo, dob);
+			if(!errormsgs.isEmpty()){
+				for (String string : errormsgs) {
+					Window.alert(string);
+					throw new Exception();
+				}	
+			}
+			
+		}
+		
+		
 			
 		}
 	public class BackButtonClickHandler implements ClickHandler{
