@@ -3,7 +3,6 @@ package com.ali.server;
 import java.util.List;
 
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
@@ -16,6 +15,7 @@ public class ServiceImpl {
 	public void saveStudent(Student s){
 		
 		//System.out.println(sf);
+		sf= HibernateUtil.getSessionFactory();
 		Session session=sf.openSession();
 		session.getTransaction().begin();
 		session.save(s);

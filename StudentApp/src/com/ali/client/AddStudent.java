@@ -1,14 +1,12 @@
 package com.ali.client;
 
 import java.util.Date;
-import java.util.List;
 
 import com.ali.shared.Student;
-import com.ali.shared.StudentValidator;
+import com.ali.shared.UIValidator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -34,8 +32,6 @@ public class AddStudent extends Composite {
 	
 	public AddStudent(){
 		initWidget(vpanel);
-		
-		
 		vpanel.setBorderWidth(1);
 		HorizontalPanel hp1 = new HorizontalPanel();
 		Label name = new Label("Name:");
@@ -96,16 +92,12 @@ public class AddStudent extends Composite {
 			// TODO Auto-generated method stub
 			String name = tb1.getText();
 			String rollNo=tb2.getText();
-			//System.out.println(rollNo+"Ali");
-			int rollNumber=rollNo.equals("")?0:Integer.parseInt(rollNo);
 			Date dob = tb3.getValue();
 			String _class = tb4.getItemText(tb4.getSelectedIndex());
-			try {
-				this.validateStudent(name,rollNo,dob);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
+			boolean isvalid=this.validateStudent(name,rollNo,dob);
+			if(isvalid){
+			int rollNumber=Integer.parseInt(rollNo);
 			Student s = new Student(name,rollNumber, dob, _class);
 			
 			
@@ -129,17 +121,10 @@ public class AddStudent extends Composite {
 			}
 			);
 
-		}
-		public void validateStudent(String name,String rollNo,Date dob) throws Exception{
-			StudentValidator sv=new StudentValidator();
-			List<String> errormsgs=sv.validateStudent(name, rollNo, dob);
-			if(!errormsgs.isEmpty()){
-				for (String string : errormsgs) {
-					Window.alert(string);
-					throw new Exception();
-				}	
-			}
-			
+		}}
+		public boolean validateStudent(String name,String rollNo,Date dob) {
+			UIValidator sv=new UIValidator();
+			return sv.validateStudent(name, rollNo, dob);
 		}
 		
 		
