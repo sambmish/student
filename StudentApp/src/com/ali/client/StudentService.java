@@ -9,6 +9,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("go")
 public interface StudentService extends RemoteService {
 	public void saveStudent(Student s);
-	public List<Student> searchStudent(String name);
+	public List<Student> searchStudent(String name,String rollNo,String standard);
 
 }

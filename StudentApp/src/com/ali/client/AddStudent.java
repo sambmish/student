@@ -80,6 +80,7 @@ public class AddStudent extends Composite {
 		vpanel.add(hp4);
 		SubmitButton save = new SubmitButton("Save", new ButtonClickHandler());
 		vpanel.add(save);
+		
 		vpanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		RootPanel.get().clear();
 		RootPanel.get().add(this);

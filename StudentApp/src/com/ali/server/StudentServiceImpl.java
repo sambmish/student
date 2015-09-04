@@ -19,9 +19,9 @@ StudentService{
 	}
 
 	@Override
-	public List<Student> searchStudent(String name) {
+	public List<Student> searchStudent(String name,String rollNo,String standard) {
 		// TODO Auto-generated method stub
-		List<Student> list=simpl.searchStudent(name);
+		List<Student> list=simpl.searchStudent(name,rollNo,standard);
 		return list;
 	}
 }

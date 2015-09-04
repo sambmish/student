@@ -9,6 +9,6 @@ public interface StudentServiceAsync {
 
 	public void saveStudent(Student s, AsyncCallback<Void> callback);
 
-	public void searchStudent(String name, AsyncCallback<List<Student>> callback);
+	public void searchStudent(String name,String rollNo,String standard, AsyncCallback<List<Student>> callback);
 
 }

@@ -7,13 +7,17 @@ import java.util.List;
 
 import com.ali.client.AddStudent.BackButtonClickHandler;
 import com.ali.shared.Student;
+import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
@@ -33,11 +37,13 @@ public class StudentSearchResult extends Composite {
 	private final StudentServiceAsync studentService = GWT
 			.create(StudentService.class);
 	VerticalPanel vpanel = new VerticalPanel();
-
-	public StudentSearchResult(String name) {
+	VerticalPanel vpanel1 = new VerticalPanel();
+	DataGrid<Student> studentgrid = new DataGrid<Student>();
+	List<Student> result1;
+	public StudentSearchResult(String name,String rollNo,String standard ) {
 		initWidget(vpanel);
 
-		studentService.searchStudent(name, new AsyncCallback<List<Student>>() {
+		studentService.searchStudent(name,rollNo,standard, new AsyncCallback<List<Student>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
@@ -54,74 +60,100 @@ public class StudentSearchResult extends Composite {
 
 			private void addResult(List<Student> result) {
 				// TODO Auto-generated method stub
+				result1=result;
 				HorizontalPanel hpanel=new HorizontalPanel();
 				SubmitButton backbutton=new SubmitButton("Back");
-				backbutton.setWidth("1");
+				//backbutton.setWidth("1");
 				backbutton.addClickHandler(new BackButtonClickHandler());
 				hpanel.add(backbutton);
 				vpanel.add(hpanel);
-				VerticalPanel vpanel1=new  VerticalPanel();
-				int noOfStudents = result.size();
-				for(int i=0;i<noOfStudents;i++){
-					CheckBox cbox=new CheckBox(i+"");
-					cbox.ensureDebugId(i+"");
-					vpanel1.add(cbox);
-				}
-
-				DataGrid<Student> studentgrid1 = new DataGrid<Student>();
 				
-				studentgrid1.setRowData(result);
-				studentgrid1
-						.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 				
-				TextColumn name = new TextColumn<Student>() {
-
-					@Override
-					public String getValue(Student object) {
-						// TODO Auto-generated method stub
-						return object.getName();
-					}
-				};
-				TextColumn rollNo = new TextColumn<Student>() {
-
-					@Override
-					public String getValue(Student object) {
-						// TODO Auto-generated method stub
-						return Integer.toString(object.getRollNo());
-					}
-				};
-				TextColumn dob = new TextColumn<Student>() {
-
-					@Override
-					public String getValue(Student object) {
-						// TODO Auto-generated method stub
-						return object.getDob().toString();
-					}
-				};
-				TextColumn class_ = new TextColumn<Student>() {
-
-					@Override
-					public String getValue(Student object) {
-						// TODO Auto-generated method stub
-						return object.getClass_();
-					}
-				};
-				studentgrid1.setRowCount(result.size());
+				studentgrid.setRowData(result);
+				 Column<Student, Boolean> checkBoxColumn = new Column<Student, Boolean>(
+				            new CheckboxCell(false, false)) {
+						@Override
+						public Boolean getValue(Student object) {
+							// TODO Auto-generated method stub
+							return null;
+						}
+				    };
+				    
+				    
+					EditTextCell nameedit=new EditTextCell();
+					Column<Student,String> namecolumn=new Column<Student,String>(nameedit) {
+						
+						@Override
+						public String getValue(Student object) {
+							// TODO Auto-generated method stub
+							return object.getName();
+						}
+					};
+					EditTextCell rnedit=new EditTextCell();
+					Column<Student,String> rncolumn=new Column<Student,String>(rnedit) {
+						
+						@Override
+						public String getValue(Student object) {
+							// TODO Auto-generated method stub
+							return Integer.toString(object.getRollNo());
+						}
+					};
 				
-				studentgrid1.addColumn(name, "Name");
-				studentgrid1.addColumn(rollNo, "Roll No");
-				studentgrid1.addColumn(dob, "Date Of Birth");
-				studentgrid1.addColumn(class_, "Standard");
-				studentgrid1.setSize("400px", "400px");
+					EditTextCell dobedit=new EditTextCell();
+					Column<Student,String> dobcolumn=new Column<Student,String>(dobedit) {
+						
+						@Override
+						public String getValue(Student object) {
+							// TODO Auto-generated method stub
+							return object.getDob().toString();
+						}
+					};
+				
+					EditTextCell classedit=new EditTextCell();
+					Column<Student,String> classcolumn=new Column<Student,String>(classedit) {
+						
+						@Override
+						public String getValue(Student object) {
+							// TODO Auto-generated method stub
+							return object.getClass_();
+						}
+					};
+				studentgrid.addColumn(checkBoxColumn,"Select");
+				studentgrid.addColumn(namecolumn, "Name");
+				studentgrid.addColumn(rncolumn, "Roll No");
+				studentgrid.addColumn(dobcolumn, "Date Of Birth");
+				studentgrid.addColumn(classcolumn, "Standard");
+				studentgrid.setSize("400px", "400px");
 				
 				HorizontalPanel h1=new HorizontalPanel();
-				vpanel.add(studentgrid1);
-				vpanel.setBorderWidth(1);
-				h1.add(vpanel);
-				h1.add(vpanel1);
+				RootPanel.get().remove(vpanel1);
+				vpanel1.add(studentgrid);
+				vpanel1.setBorderWidth(1);
+				vpanel.add(vpanel1);
+				Button updatebutton=new Button("Update",new ClickHandler() {
+					
+					@Override
+					public void onClick(ClickEvent event) {
+						
+						System.out.println(studentgrid.getColumn(0).getValue(result1.get(0)));
+					}
+				});
+				Button deletebutton=new Button("Delete");
+				h1.add(updatebutton);
+				h1.add(deletebutton);
+				vpanel.add(h1);
+				
+					/*for (Student student : result) {
+						if(studentgrid.getRowContainer().getAbsoluteLeft()){
+							
+						}
+					}*/
+					
+				updatebutton.addClickHandler(new UpdateClickHandler());
+				deletebutton.addClickHandler(new DeleteClickHandler());
+				vpanel.add(deletebutton);
 				
 
-				RootPanel.get().add(vpanel1);
 
 			}
 
@@ -133,6 +165,23 @@ public class StudentSearchResult extends Composite {
 		public void onClick(ClickEvent event) {
 			// TODO Auto-generated method stub
 			MainPage mainpage=new MainPage();
+			//vpanel.add(addStudentpage);
+			
+		}
+	}
+	public class DeleteClickHandler implements ClickHandler{
+		@Override
+		public void onClick(ClickEvent event) {
+			// TODO Auto-generated method stub
+			
+			
+		}
+	}
+	public class UpdateClickHandler implements ClickHandler{
+		@Override
+		public void onClick(ClickEvent event) {
+			// TODO Auto-generated method stub
+			//MainPage mainpage=new MainPage();
 			//vpanel.add(addStudentpage);
 			
 		}
