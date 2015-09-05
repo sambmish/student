@@ -5,6 +5,7 @@ import java.util.List;
 import com.ali.shared.Student;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.EditTextCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -18,6 +19,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 public class StudentSearchResult extends Composite {
 	/*
@@ -34,6 +39,7 @@ public class StudentSearchResult extends Composite {
 	TextBox srchRNtb = new TextBox();
 	TextBox srchStrdtb = new TextBox();
 	VerticalPanel headerPanel = new VerticalPanel();
+	DataGrid<Student> studentgrid = new DataGrid<Student>();
 
 	public class GoBttonHandler implements ClickHandler {
 		@Override
@@ -109,7 +115,16 @@ public class StudentSearchResult extends Composite {
 	public class DeleteClickHandler implements ClickHandler {
 		@Override
 		public void onClick(ClickEvent event) {
-
+			List<Student> visibleItems = studentgrid.getVisibleItems();
+			for (Student student : visibleItems) {
+				System.out.println("record:-------------");
+				System.out.println(student.getClass_());
+				System.out.println(student.getName());
+				System.out.println(student.getRollNo());
+				System.out.println(student.getDob());
+				System.out.println(student.isSelected());
+				System.out.println();
+			}
 		}
 	}
 
@@ -123,65 +138,19 @@ public class StudentSearchResult extends Composite {
 	private void addResult(final List<Student> result) {
 		vpanel.clear();
 		VerticalPanel vpanel1 = new VerticalPanel();
-		final DataGrid<Student> studentgrid = new DataGrid<Student>();
 		HorizontalPanel hpanel = new HorizontalPanel();
 		SubmitButton backbutton = new SubmitButton("Back");
 		// backbutton.setWidth("1");
 		backbutton.addClickHandler(new BackButtonClickHandler());
 		hpanel.add(backbutton);
 		vpanel.add(hpanel);
-
+		studentgrid = new DataGrid<Student>();
 		studentgrid.setRowData(result);
-		Column<Student, Boolean> checkBoxColumn = new Column<Student, Boolean>(
-				new CheckboxCell(false, false)) {
-			@Override
-			public Boolean getValue(Student object) {
-				return null;
-			}
-		};
-
-		EditTextCell nameedit = new EditTextCell();
-		Column<Student, String> namecolumn = new Column<Student, String>(
-				nameedit) {
-
-			@Override
-			public String getValue(Student object) {
-				return object.getName();
-			}
-		};
-		EditTextCell rnedit = new EditTextCell();
-		Column<Student, String> rncolumn = new Column<Student, String>(rnedit) {
-
-			@Override
-			public String getValue(Student object) {
-				return Integer.toString(object.getRollNo());
-			}
-		};
-
-		EditTextCell dobedit = new EditTextCell();
-		Column<Student, String> dobcolumn = new Column<Student, String>(dobedit) {
-
-			@Override
-			public String getValue(Student object) {
-				return object.getDob().toString();
-			}
-		};
-
-		EditTextCell classedit = new EditTextCell();
-		Column<Student, String> classcolumn = new Column<Student, String>(
-				classedit) {
-
-			@Override
-			public String getValue(Student object) {
-				return object.getClass_();
-			}
-		};
-		studentgrid.addColumn(checkBoxColumn, "Select");
-		studentgrid.addColumn(namecolumn, "Name");
-		studentgrid.addColumn(rncolumn, "Roll No");
-		studentgrid.addColumn(dobcolumn, "Date Of Birth");
-		studentgrid.addColumn(classcolumn, "Standard");
+		createGridColumns();
 		studentgrid.setSize("400px", "400px");
+		SingleSelectionModel<Student> selectionModel = new SingleSelectionModel<Student>();
+		studentgrid.setSelectionModel(selectionModel);
+		selectionModel.addSelectionChangeHandler(getSelectionChangeListener());
 
 		HorizontalPanel h1 = new HorizontalPanel();
 		vpanel.remove(vpanel1);
@@ -215,6 +184,93 @@ public class StudentSearchResult extends Composite {
 		deletebutton.addClickHandler(new DeleteClickHandler());
 		vpanel.add(deletebutton);
 
+	}
+
+	private Handler getSelectionChangeListener() {
+		Handler handler = new Handler() {
+			
+			@Override
+			public void onSelectionChange(SelectionChangeEvent event) {
+				System.out.println(event.getSource());
+				int keyboardSelectedColumn = studentgrid.getKeyboardSelectedColumn();
+				int keyboardSelectedRow = studentgrid.getKeyboardSelectedRow();
+				System.out.println(keyboardSelectedColumn);
+				System.out.println(keyboardSelectedRow);
+			}
+		};
+		return handler ;
+	}
+
+	private void createGridColumns() {
+		final Column<Student, Boolean> checkBoxColumn = new Column<Student, Boolean>(
+				new CheckboxCell(false, false)) {
+			@Override
+			public Boolean getValue(final Student object) {
+				return object.isSelected();
+			}
+		};
+		
+		checkBoxColumn.setFieldUpdater(new FieldUpdater<Student, Boolean>() {
+
+			@Override
+			public void update(int index, Student object, Boolean value) {
+				object.setSelected(value);
+			}
+		});
+		
+		
+		final EditTextCell nameedit = new EditTextCell();
+		final Column<Student, String> namecolumn = new Column<Student, String>(
+				nameedit) {
+
+			@Override
+			public String getValue(final Student object) {
+				return object.getName();
+			}
+		};
+		
+		namecolumn.setFieldUpdater(new FieldUpdater<Student, String>() {
+
+			@Override
+			public void update(int index, Student object, String value) {
+				object.setName(value);
+			}
+		});
+		
+		final EditTextCell rnedit = new EditTextCell();
+		final Column<Student, String> rncolumn = new Column<Student, String>(
+				rnedit) {
+
+			@Override
+			public String getValue(final Student object) {
+				return Integer.toString(object.getRollNo());
+			}
+		};
+
+		final EditTextCell dobedit = new EditTextCell();
+		final Column<Student, String> dobcolumn = new Column<Student, String>(
+				dobedit) {
+
+			@Override
+			public String getValue(final Student object) {
+				return object.getDob().toString();
+			}
+		};
+
+		final EditTextCell classedit = new EditTextCell();
+		final Column<Student, String> classcolumn = new Column<Student, String>(
+				classedit) {
+
+			@Override
+			public String getValue(final Student object) {
+				return object.getClass_();
+			}
+		};
+		studentgrid.addColumn(checkBoxColumn, "Select");
+		studentgrid.addColumn(namecolumn, "Name");
+		studentgrid.addColumn(rncolumn, "Roll No");
+		studentgrid.addColumn(dobcolumn, "Date Of Birth");
+		studentgrid.addColumn(classcolumn, "Standard");
 	}
 
 }
