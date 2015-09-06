@@ -72,5 +72,14 @@ public class ServiceImpl {
 		return stuList;
 		
 	}
+	public void deleteStudent(Student s){
+		sf= HibernateUtil.getSessionFactory();
+		Session session=sf.openSession();
+		session.getTransaction().begin();
+		session.delete(s);
+		session.getTransaction().commit();
+		
+		
+	}
 
 }

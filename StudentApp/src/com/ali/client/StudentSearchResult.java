@@ -1,21 +1,30 @@
 package com.ali.client;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.ali.shared.Student;
+import com.ali.shared.UIValidator;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.DatePickerCell;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.SelectionCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -23,6 +32,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sun.java.swing.plaf.windows.resources.windows;
 
 public class StudentSearchResult extends Composite {
 	/*
@@ -96,7 +106,10 @@ public class StudentSearchResult extends Composite {
 
 					@Override
 					public void onSuccess(List<Student> result) {
+							
 						addResult(result);
+						if(result.size()==0)
+							Window.alert("No student exists for this search criteria");
 
 					}
 
@@ -115,16 +128,35 @@ public class StudentSearchResult extends Composite {
 	public class DeleteClickHandler implements ClickHandler {
 		@Override
 		public void onClick(ClickEvent event) {
+			
+			
 			List<Student> visibleItems = studentgrid.getVisibleItems();
+			Student s=new Student();
 			for (Student student : visibleItems) {
-				System.out.println("record:-------------");
-				System.out.println(student.getClass_());
-				System.out.println(student.getName());
-				System.out.println(student.getRollNo());
-				System.out.println(student.getDob());
-				System.out.println(student.isSelected());
-				System.out.println();
-			}
+				if(student.isSelected()){
+					boolean doDelete=Window.confirm("Do You really want to delete the student");
+					if(doDelete){
+				s.setRollNo(student.getRollNo());
+				s.setClass_(student.getClass_());
+				studentService.deleteStudent(s, new AsyncCallback<Void>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+						Window.alert("Problem deleting the student");
+					}
+
+					@Override
+					public void onSuccess(Void result) {
+						// TODO Auto-generated method stub
+						
+						StudentSearchResult.this.reloadStudentgrid();
+						Window.alert("Student deleted successfully.");
+						
+					}
+				});
+				}
+			}}
 		}
 	}
 
@@ -151,7 +183,7 @@ public class StudentSearchResult extends Composite {
 		SingleSelectionModel<Student> selectionModel = new SingleSelectionModel<Student>();
 		studentgrid.setSelectionModel(selectionModel);
 		selectionModel.addSelectionChangeHandler(getSelectionChangeListener());
-
+		
 		HorizontalPanel h1 = new HorizontalPanel();
 		vpanel.remove(vpanel1);
 		vpanel.add(headerPanel);
@@ -184,6 +216,13 @@ public class StudentSearchResult extends Composite {
 		deletebutton.addClickHandler(new DeleteClickHandler());
 		vpanel.add(deletebutton);
 
+	}
+	
+	private void reloadStudentgrid(){
+		String name = srchNametb.getValue();
+		String rollNo = srchRNtb.getValue();
+		String strd = srchStrdtb.getValue();
+		search(name, rollNo, strd);
 	}
 
 	private Handler getSelectionChangeListener() {
@@ -246,18 +285,38 @@ public class StudentSearchResult extends Composite {
 				return Integer.toString(object.getRollNo());
 			}
 		};
+		rncolumn.setFieldUpdater(new FieldUpdater<Student, String>() {
 
-		final EditTextCell dobedit = new EditTextCell();
-		final Column<Student, String> dobcolumn = new Column<Student, String>(
+			@Override
+			public void update(int index, Student object, String value) {
+				// TODO Auto-generated method stub
+				UIValidator validator=new UIValidator();
+				if(validator.validateRollNo(value))
+				object.setRollNo(Integer.parseInt(value));
+			}
+		});
+
+		final DatePickerCell dobedit = new DatePickerCell();
+		final Column<Student, Date> dobcolumn = new Column<Student, Date>(
 				dobedit) {
 
 			@Override
-			public String getValue(final Student object) {
-				return object.getDob().toString();
+			public Date getValue(final Student object) {
+				return object.getDob();
 			}
 		};
+		dobcolumn.setFieldUpdater(new FieldUpdater<Student, Date>() {
 
-		final EditTextCell classedit = new EditTextCell();
+			@Override
+			public void update(int index, Student object, Date value) {
+				// TODO Auto-generated method stub
+				object.setDob(value);
+			}
+		});
+
+		List<String> standardList=getStandardList();
+		SelectionCell classedit=new SelectionCell(standardList);
+		
 		final Column<Student, String> classcolumn = new Column<Student, String>(
 				classedit) {
 
@@ -266,11 +325,33 @@ public class StudentSearchResult extends Composite {
 				return object.getClass_();
 			}
 		};
+		classcolumn.setFieldUpdater(new FieldUpdater<Student, String>() {
+
+			@Override
+			public void update(int index, Student object, String value) {
+				// TODO Auto-generated method stub
+				object.setClass_(value);
+			}
+		});
 		studentgrid.addColumn(checkBoxColumn, "Select");
 		studentgrid.addColumn(namecolumn, "Name");
 		studentgrid.addColumn(rncolumn, "Roll No");
 		studentgrid.addColumn(dobcolumn, "Date Of Birth");
 		studentgrid.addColumn(classcolumn, "Standard");
+	}
+	private static List<String> getStandardList(){
+		List<String> standardList=new ArrayList<String>();
+		standardList.add(0, "I");
+		standardList.add(0, "II");
+		standardList.add(0, "III");
+		standardList.add(0, "IV");
+		standardList.add(0, "V");
+		standardList.add(0, "VI");
+		standardList.add(0, "VII");
+		standardList.add(0, "VIII");
+		standardList.add(0, "IX");
+		standardList.add(0, "X");
+		return standardList;
 	}
 
 }

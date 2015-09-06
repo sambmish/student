@@ -24,4 +24,10 @@ StudentService{
 		List<Student> list=simpl.searchStudent(name,rollNo,standard);
 		return list;
 	}
+
+	@Override
+	public void deleteStudent(Student s) {
+		// TODO Auto-generated method stub
+		simpl.deleteStudent(s);
+	}
 }

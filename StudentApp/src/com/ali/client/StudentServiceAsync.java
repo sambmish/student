@@ -11,4 +11,6 @@ public interface StudentServiceAsync {
 
 	public void searchStudent(String name,String rollNo,String standard, AsyncCallback<List<Student>> callback);
 
+	void deleteStudent(Student s, AsyncCallback<Void> callback);
+
 }

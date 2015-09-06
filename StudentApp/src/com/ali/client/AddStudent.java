@@ -7,6 +7,7 @@ import com.ali.shared.UIValidator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -104,7 +105,13 @@ public class AddStudent extends Composite {
 					public void onSuccess(Void result) {
 						// TODO Auto-generated method stub
 
-						System.out.println("Success");
+						boolean issaved=Window.confirm("Student Saved Successfully");
+						if(issaved){
+							tb1.setValue(null);
+							tb2.setValue(null);
+							tb3.setValue(null);
+							
+						}
 
 					}
 
