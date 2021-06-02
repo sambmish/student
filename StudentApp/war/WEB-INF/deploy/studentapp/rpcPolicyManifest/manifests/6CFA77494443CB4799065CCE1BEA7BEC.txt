@@ -1,0 +1,2 @@
+serviceClass: com.ali.client.StudentService
+path: 3073E371784C206D04D722971302F8B3.gwt.rpc
